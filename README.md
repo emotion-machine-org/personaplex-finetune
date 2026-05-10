@@ -10,13 +10,13 @@ Two short clips illustrate the input → output of the pipeline.
 
 **Synthetic training data** — VibeVoice-rendered stereo (left=agent, right=patient) of a Claude-generated pharma support dialogue, the kind of sample that ends up in `data/<dataset>/stereo_wav/`:
 
-<video controls src="https://github.com/emotion-machine-org/personaplex-finetune/raw/main/assets/synthetic_data_example.mp3"></video>
+https://github.com/user-attachments/assets/6b797841-ddb0-4cf8-80fa-219310b9bcc9
 
-**Trained model output** — generation eval of a PersonaPlex pharma finetune at step 1024 (run `pharma-v2-22`, LoRA r64), with mid-conversation context injection from the puppeteer LLM:
+**Trained model output** — generation eval of a PersonaPlex pharma finetune at step 1024 (run `pharma-v2-22`, LoRA r64), with mid-conversation context injection from the puppeteer LLM. The finetuned model learned the structure of a pharmaceutical adherence call and succcessfully applies it in this example.
 
-<video controls src="https://github.com/emotion-machine-org/personaplex-finetune/raw/main/assets/personaplex_personaplex_eval.mp3"></video>
+The base model fails at executing a structured call because it's not good at following instructions although the finetuned model is far from perfect as well. The base model is the client in this example and it is confused especially at the start but the finetuned model (Mia) manages to mostly stay on track, like a real call:
 
-> The audio embeds use the `<video controls>` tag because GitHub strips `<audio>` from rendered markdown. To listen locally, the source files are in [`assets/`](assets/).
+https://github.com/user-attachments/assets/f4df4072-eb40-4354-9977-bf60d1fad2b1
 
 ## What we did with this code
 
