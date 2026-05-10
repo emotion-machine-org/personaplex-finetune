@@ -1,0 +1,128 @@
+[project]
+name = "personaplex-finetune"
+version = "0.1.0"
+description = "Open-source PersonaPlex / Moshi 7B finetuning workspace — voice training pipeline, LoRA + full finetune, context injection (puppeteer), and evaluation."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10,<3.13"
+authors = [
+    { name = "Ege Ozin", email = "rababamsabou@gmail.com" },
+    { name = "Ege Demir", email = "demegire@gmail.com" },
+]
+keywords = ["moshi", "personaplex", "voice", "tts", "lora", "finetuning", "speech"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# Top-level orchestration deps. Vendored sub-projects (moshi-finetune/,
+# personaplex/) carry their own pyproject.toml and are installed separately.
+# CUDA-bound deps stay pinned exactly because minor bumps break numerics.
+dependencies = [
+    # Numerics — exact pins (changes here change training results)
+    "torch==2.10.0",
+    "torchaudio==2.10.0",
+    "transformers==4.51.3",
+    "accelerate==1.6.0",
+    "safetensors==0.7.0",
+    "huggingface-hub==0.36.2",
+    "datasets==3.5.0",
+    # Audio pipeline — pinned to known-good versions
+    "sphn==0.2.1",
+    "faster-whisper==1.2.1",
+    "whisperx==3.8.1",
+    "pyannote-audio==4.0.4",
+    "torch-audiomentations==0.12.0",
+    # Common utilities — ranges OK
+    "numpy>=1.26,<2.2",
+    "scipy>=1.11,<2",
+    "pyyaml>=6,<7",
+    "tqdm>=4.65,<5",
+    "rich>=13,<15",
+    "fire>=0.5,<1",
+    "pandas>=2.1,<3",
+    "pyarrow>=14,<22",
+]
+
+[project.optional-dependencies]
+# Synthetic-data + evaluation (LLM judges)
+eval = [
+    "anthropic>=0.84,<1",
+    "google-genai>=0.3,<2",
+]
+# Training-time dependencies (FlashAttention, wandb, etc.)
+train = [
+    "flash-attn==2.8.3",
+    "wandb>=0.18,<1",
+]
+# Dev tooling
+dev = [
+    "ruff>=0.6,<1",
+    "pytest>=8,<9",
+]
+# Wandb export utilities
+wandb-export = [
+    "wandb>=0.18,<1",
+    "matplotlib>=3.8,<4",
+]
+
+[project.urls]
+Repository = "https://github.com/emotion-machine-org/personaplex-finetune"
+Issues = "https://github.com/emotion-machine-org/personaplex-finetune/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+# This is a workspace, not a distributable library. Hatchling needs a
+# package list; use the pipeline scripts as the canonical package.
+packages = ["pipeline"]
+
+# ---- Tooling ------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+exclude = [
+    "moshi-finetune",   # vendored
+    "personaplex",      # vendored
+    "VibeVoice",        # vendored
+    ".venv",
+    "runs",
+    "data",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "SIM", "RUF"]
+ignore = [
+    "E501",   # line length handled by formatter
+    "B008",   # function calls in defaults (common in CLI helpers)
+    "N806",   # uppercase locals (common in ML for hyperparameters)
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+testpaths = ["pipeline", "tests"]
+python_files = ["test_*.py", "*_test.py"]
+
+# ---- uv workspace -------------------------------------------------------
+
+[tool.uv]
+# We DON'T pull moshi-finetune / personaplex into the workspace install
+# graph — they have their own venvs and incompatible torch pins. They live
+# in-tree as reference / patched code.
+constraint-dependencies = []
+
+[tool.uv.sources]
+# Editable install of pipeline/ (top-level orchestration code).

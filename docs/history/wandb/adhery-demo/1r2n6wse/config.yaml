@@ -1,0 +1,72 @@
+batch_size: 32
+ckpt_freq: 128
+data:
+  eval_data: /home/egede/data/adhery-v2/dataset/eval.jsonl
+  shuffle: true
+  train_data: /home/egede/data/adhery-v2/dataset/train.jsonl
+do_ckpt: true
+do_eval: true
+duration_sec: 120
+eval_freq: 128
+first_codebook_weight_multiplier: 4
+full_finetuning: false
+gen_eval:
+  dialogue_duration: 300
+  dialogue_timeout: 900
+  enable: true
+  eval_prompts_path: /home/egede/projects/voice-training/moshi-finetune/finetune/eval_prompts_adhery.json
+  freq: 128
+  gpu_a: 0
+  gpu_b: 0
+  llm_model: claude-sonnet-4-20250514
+  llm_review: true
+  max_nudges: 0
+  nudge_after: 2
+  seed: 42
+  temp_audio: 0.45
+  temp_text: 0.4
+  topk_audio: 80
+  topk_text: 15
+gradient_checkpointing: true
+log_freq: 1
+lora:
+  enable: true
+  ft_embed: false
+  rank: 64
+  scaling: 2
+  skip_depformer: true
+max_norm: 1
+max_steps: 512
+moshi_paths:
+  config_path: null
+  hf_repo_id: nvidia/personaplex-7b-v1
+  mimi_path: null
+  moshi_path: null
+  tokenizer_path: null
+num_ckpt_keep: null
+num_microbatches: 1
+optim:
+  lr: 2.0e-05
+  pct_start: 0.05
+  weight_decay: 0.1
+overwrite_run_dir: false
+param_dtype: bfloat16
+puppeteer:
+  context_tag: context
+  enable: true
+  max_tokens_per_injection: 50
+resume_from: /home/egede/data/runs/adhery-v2-1
+run_dir: /home/egede/data/runs/adhery-v2-1
+save_adapters: true
+seed: 0
+system_prompt:
+  audio_silence_frames: 6
+  enable: true
+  prompt_budget_frames: 281
+text_padding_weight: 0.5
+wandb:
+  key: null
+  offline: false
+  project: adhery-demo
+  run_name: adhery-v2-1
+world_size: 1

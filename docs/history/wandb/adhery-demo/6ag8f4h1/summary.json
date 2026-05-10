@@ -1,0 +1,15 @@
+{
+  "_runtime": 1758.860373121,
+  "_step": 0,
+  "_timestamp": 1775407441.8932378,
+  "_wandb.runtime": 1758,
+  "eval/audio_eval_loss": 1.4738508462905884,
+  "eval/eval_loss": 2.6060752868652344,
+  "eval/eval_pred_pad_pct": 80.5125,
+  "eval/eval_real_token_pct": 14.456666263749549,
+  "eval/pad_token_eval_loss": 0.3291901461780071,
+  "eval/perplexity": 6.088451385498047,
+  "eval/real_token_eval_loss": 1.1322245448827744,
+  "eval/text_eval_loss": 1.1322245597839355,
+  "eval/train_loss": 0
+}

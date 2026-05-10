@@ -1,0 +1,58 @@
+# data
+data:
+  eval_data: '' # Optional Fill
+  shuffle: true
+  train_data: '' # Fill
+
+# model
+moshi_paths: 
+  hf_repo_id: "kyutai/moshiko-pytorch-bf16"
+
+full_finetuning: false # Activate lora.enable if partial finetuning
+lora:
+  enable: true # Set to False if full_finetuning is True
+  rank: 128
+  scaling: 2.
+  ft_embed: false # Optional, set to True if you want to finetune the embedding layer
+
+first_codebook_weight_multiplier: 100.
+text_padding_weight: .5
+
+# optim
+duration_sec: 100
+batch_size: 16
+max_steps: 2000
+gradient_checkpointing: true
+optim:
+  lr: 2e-6
+  weight_decay: 0.1
+  pct_start: 0.05
+
+# other
+seed: 0
+log_freq: 1
+eval_freq: 100
+do_eval: false
+do_ckpt: true
+ckpt_freq: 100
+
+
+save_adapters: true # Must be False if full_finetuning is True
+
+# PersonaPlex-style hybrid system prompt (text role + voice cloning)
+# When enabled, each sample's .json can include:
+#   "text_prompt": "You are an agent named ..."
+#   "voice_prompt": "path/to/voice_sample.wav"  (optional, relative to .json)
+# The prompt is prepended to each sequence and loss is masked over it.
+system_prompt:
+  enable: false
+  audio_silence_frames: 6  # ~0.48s silence between prompt segments
+
+run_dir: ""  # Fill
+
+# This part is optional and can be kept commented out
+# wandb:
+#   project: "" # your wandb project name
+#   run_name: "" # your wandb run name
+#   key: "" # your wandb api key
+#   offline: False

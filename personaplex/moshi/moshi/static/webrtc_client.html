@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PersonaPlex - WebRTC</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+         background: #0f172a; color: #e2e8f0; min-height: 100vh;
+         display: flex; align-items: center; justify-content: center; }
+  .container { width: 100%; max-width: 520px; padding: 2rem; }
+  h1 { font-size: 1.5rem; margin-bottom: 1.5rem; color: #f8fafc; }
+  .form-group { margin-bottom: 1rem; }
+  label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.25rem;
+          text-transform: uppercase; letter-spacing: 0.05em; }
+  input, textarea, select {
+    width: 100%; padding: 0.6rem 0.75rem; background: #1e293b; border: 1px solid #334155;
+    border-radius: 6px; color: #e2e8f0; font-size: 0.9rem; outline: none;
+  }
+  input:focus, textarea:focus { border-color: #6366f1; }
+  textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+  .row { display: flex; gap: 0.75rem; }
+  .row .form-group { flex: 1; }
+  button {
+    width: 100%; padding: 0.75rem; border: none; border-radius: 8px;
+    font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  #connect-btn { background: #6366f1; color: white; margin-top: 0.5rem; }
+  #connect-btn:hover { background: #4f46e5; }
+  #connect-btn:disabled { background: #475569; cursor: not-allowed; }
+  #disconnect-btn { background: #ef4444; color: white; margin-top: 0.5rem; display: none; }
+  #disconnect-btn:hover { background: #dc2626; }
+  .status-bar {
+    margin-top: 1rem; padding: 0.75rem; background: #1e293b; border-radius: 6px;
+    font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #64748b; flex-shrink: 0; }
+  .status-dot.connected { background: #22c55e; }
+  .status-dot.connecting { background: #eab308; animation: pulse 1s infinite; }
+  .status-dot.error { background: #ef4444; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .transcript {
+    margin-top: 1rem; padding: 0.75rem; background: #1e293b; border-radius: 6px;
+    min-height: 60px; max-height: 200px; overflow-y: auto; font-size: 0.85rem;
+    color: #cbd5e1; white-space: pre-wrap; word-wrap: break-word;
+  }
+  .transcript:empty::before { content: 'Transcript will appear here...'; color: #475569; }
+  .section-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase;
+                   letter-spacing: 0.1em; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>PersonaPlex</h1>
+
+  <div class="form-group">
+    <label>Text Prompt</label>
+    <textarea id="text-prompt">You are Emma, a friendly and supportive AI companion. Your role is to have natural, engaging conversations — listening actively, offering thoughtful responses, and helping the user think through whatever is on their mind. Be honest about what you do not know rather than guessing or making things up. You do not have access to day-to-day information such as what you did today, recent events in your own life, or personal experiences — if the user asks questions like these, gently redirect the conversation back to them. Be respectful, avoid offensive or hurtful language, and never pressure the user or make judgments about their choices.</textarea>
+  </div>
+
+  <div class="form-group">
+    <label>Voice Prompt Filename</label>
+    <input type="text" id="voice-prompt" value="NATF0.pt">
+  </div>
+
+  <div class="form-group">
+    <label>Greeting</label>
+    <input type="text" id="greeting" value="Hello there.">
+  </div>
+
+  <div class="section-label">Sampling</div>
+  <div class="row">
+    <div class="form-group">
+      <label>Audio Temp</label>
+      <input type="number" id="audio-temp" value="0.65" step="0.05" min="0" max="2">
+    </div>
+    <div class="form-group">
+      <label>Text Temp</label>
+      <input type="number" id="text-temp" value="0.6" step="0.05" min="0" max="2">
+    </div>
+    <div class="form-group">
+      <label>Audio Top-K</label>
+      <input type="number" id="audio-topk" value="150" min="1" max="2048">
+    </div>
+    <div class="form-group">
+      <label>Text Top-K</label>
+      <input type="number" id="text-topk" value="20" min="1" max="2048">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group">
+      <label>Seed (-1 = random)</label>
+      <input type="number" id="seed" value="-1">
+    </div>
+  </div>
+
+  <button id="connect-btn">Connect</button>
+  <button id="disconnect-btn">Disconnect</button>
+
+  <div class="status-bar">
+    <span class="status-dot" id="status-dot"></span>
+    <span id="status-text">Disconnected</span>
+  </div>
+
+  <div class="section-label">Transcript</div>
+  <div class="transcript" id="transcript"></div>
+</div>
+
+<audio id="audio-el" autoplay></audio>
+
+<script>
+const STUN_SERVERS = [
+  { urls: ['stun:stun.l.google.com:19302'] },
+  { urls: ['stun:stun1.l.google.com:19302'] },
+];
+
+let pc = null;
+let pcId = null;
+
+const connectBtn = document.getElementById('connect-btn');
+const disconnectBtn = document.getElementById('disconnect-btn');
+const statusDot = document.getElementById('status-dot');
+const statusText = document.getElementById('status-text');
+const audioEl = document.getElementById('audio-el');
+const transcriptEl = document.getElementById('transcript');
+
+function setStatus(state, text) {
+  statusDot.className = 'status-dot ' + state;
+  statusText.textContent = text;
+}
+
+function getConfig() {
+  return {
+    text_prompt: document.getElementById('text-prompt').value,
+    voice_prompt: document.getElementById('voice-prompt').value,
+    greeting: document.getElementById('greeting').value,
+    audio_temperature: parseFloat(document.getElementById('audio-temp').value),
+    text_temperature: parseFloat(document.getElementById('text-temp').value),
+    audio_topk: parseInt(document.getElementById('audio-topk').value),
+    text_topk: parseInt(document.getElementById('text-topk').value),
+    seed: parseInt(document.getElementById('seed').value),
+  };
+}
+
+async function connect() {
+  connectBtn.disabled = true;
+  setStatus('connecting', 'Connecting...');
+
+  try {
+    pc = new RTCPeerConnection({ iceServers: STUN_SERVERS });
+
+    // Audio only — add mic track
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        sampleRate: 24000,
+        channelCount: 1,
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+      }
+    });
+    stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+    // Receive remote audio
+    pc.ontrack = (event) => {
+      audioEl.srcObject = event.streams[0];
+    };
+
+    // Monitor connection state
+    pc.onconnectionstatechange = () => {
+      const state = pc.connectionState;
+      if (state === 'connected') {
+        setStatus('connected', 'Connected');
+        connectBtn.style.display = 'none';
+        disconnectBtn.style.display = 'block';
+      } else if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+        cleanup();
+      }
+    };
+
+    // Data channel for text transcript
+    pc.ondatachannel = (event) => {
+      const dc = event.channel;
+      dc.onmessage = (e) => {
+        try {
+          const msg = JSON.parse(e.data);
+          if (msg.type === 'text') {
+            transcriptEl.textContent += msg.data;
+            transcriptEl.scrollTop = transcriptEl.scrollHeight;
+          }
+        } catch {}
+      };
+    };
+
+    // Create and send offer with session config
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+
+    const config = getConfig();
+    const response = await fetch('/api/offer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sdp: offer.sdp,
+        type: 'offer',
+        ...config,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}`);
+    }
+
+    const answer = await response.json();
+    pcId = answer.pc_id;
+
+    await pc.setRemoteDescription(new RTCSessionDescription({
+      sdp: answer.sdp,
+      type: 'answer',
+    }));
+
+    // Send ICE candidates
+    pc.onicecandidate = async (event) => {
+      if (event.candidate && pcId) {
+        await fetch('/api/offer', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pc_id: pcId,
+            candidate: event.candidate.candidate,
+            sdpMLineIndex: event.candidate.sdpMLineIndex,
+            sdpMid: event.candidate.sdpMid,
+          }),
+        });
+      }
+    };
+
+  } catch (err) {
+    console.error('Connection failed:', err);
+    setStatus('error', 'Failed: ' + err.message);
+    cleanup();
+  }
+}
+
+function disconnect() {
+  if (pc) {
+    pc.close();
+  }
+  cleanup();
+}
+
+function cleanup() {
+  if (pc) {
+    // Stop all local tracks
+    pc.getSenders().forEach(sender => {
+      if (sender.track) sender.track.stop();
+    });
+    pc = null;
+  }
+  pcId = null;
+  audioEl.srcObject = null;
+  connectBtn.disabled = false;
+  connectBtn.style.display = 'block';
+  disconnectBtn.style.display = 'none';
+  setStatus('', 'Disconnected');
+}
+
+connectBtn.addEventListener('click', connect);
+disconnectBtn.addEventListener('click', disconnect);
+</script>
+</body>
+</html>

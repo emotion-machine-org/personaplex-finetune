@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar::-webkit-scrollbar {
+    width: 10px;
+  }
+  .scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar::-webkit-scrollbar-thumb {
+    background: white;
+    border: 3px solid #f6f7ed;
+  }
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 8px;
+  height: 100%;
+  grid-template-areas:
+    "player"
+    "player-text"
+    "player-stats";
+}
+
+.player {
+  grid-area: player;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.server-audio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-audio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-stats { grid-area: player-stats; width: 100%; }
+.player-text { grid-area: player-text; width: 100%; height: 100%; overflow: auto; }
+
+.download-links { display: none; }

@@ -1,0 +1,80 @@
+{
+  "review_prompt": "You are evaluating a simulated voice phone call between an automated care assistant named Mia (for a medication adherence support program) and a patient.\n\nCRITICAL \u2014 TRANSCRIPTION LIMITATIONS: These transcripts come from automatic speech recognition and are UNRELIABLE for specific words. Drug names, patient names, dosages, dollar amounts, and medical terms are frequently mangled beyond recognition (e.g. \"Wiggly\" = \"Wegovy\", \"Lex a pro\" = \"Lexapro\", \"a tour of a statin\" = \"atorvastatin\"). Do NOT penalize the agent for how the transcript renders specific words. Instead, evaluate based on the GENERAL STRUCTURE and INTENT of the conversation: did the agent follow the right flow, discuss the right topics, and reference injected information at roughly the right time? Only mark a claim as \"garbled\" or \"fabricated\" if you are confident the agent actually conveyed wrong information \u2014 not because the transcript garbled a word. When in doubt, classify as \"correct\".\n\nSCENARIO: {scenario}\n\n{reference_block}\nMIA SAID:\n{text_a}\n\nPATIENT SAID:\n{text_b}\n\nTASK 1 \u2014 Quality ratings (1-5 each):\n1. COHERENCE: Does the conversation flow logically? Are there non-sequiturs, abrupt topic changes, or excessive repetition?\n2. NATURALNESS: Does it sound like a real phone call? Appropriate turn-taking, natural pacing, phone-call conventions?\n3. EFFECTIVENESS: Does Mia follow proper call protocol? Score on: (a) identity verification at the start, (b) medication adherence assessment \u2014 identifying gaps and barriers, (c) clinical hedging \u2014 referring to provider rather than giving direct medical advice, (d) empathetic but professional tone, (e) use of injected context when provided.\n\nTASK 2 \u2014 Clinical and factual claims:\nExtract the agent's major factual claims \u2014 topics discussed, information referenced, actions proposed. Focus on STRUCTURAL accuracy: did the agent discuss the right topics from the system prompt and injections? Ignore exact wording and transcription spelling.\n- \"correct\": the agent clearly discussed or referenced information from the system prompt, injections, or established clinical knowledge\n- \"garbled\": the agent attempted to reference provided information but conveyed the WRONG meaning (not just a transcription spelling error)\n- \"fabricated\": the agent introduced an entire topic or recommendation with no basis in the provided context\nDo NOT include empathetic statements, pleasantries, or general encouragement.\n{injection_task}\nRespond ONLY with this JSON (no other text):\n{{\"notes\": \"<1-2 sentence summary>\", \"coherence\": <int 1-5>, \"naturalness\": <int 1-5>, \"effectiveness\": <int 1-5>, \"broker_claims\": [{{\"claim\": \"<topic/information the agent discussed>\", \"verdict\": \"<correct|garbled|fabricated>\", \"reference\": \"<which source, or none>\"}}], \"injection_results\": [{{\"index\": <1-based int>, \"used\": <bool>, \"accurate\": <bool>, \"detail\": \"<brief note>\"}}]}}",
+  "prompts": [
+    {
+      "id": "eval_glp1_checkin",
+      "scenario": "GLP-1 dose escalation check-in with cost barrier",
+      "broker_prompt": "PROGRAM: Wegovy Care Support\nPATIENT: Carmen Gutierrez, 44F\nMEDICATION: Semaglutide (Wegovy) 1.0mg weekly injection, 10 weeks on treatment\nCLINICAL: Currently on third dose tier (1.0mg). Fill rate 80% through first two tiers. Last refill pickup: 9 days ago. Mild nausea reported at 0.5mg escalation (week 5), resolved within 3 days per patient report. No other side effects on file.\nPRIOR CONTACT: Last call at week 6 \u2014 confirmed 0.5mg tolerability, patient upbeat about 11-lb weight loss. Mentioned husband also interested in starting.\nCALL GOAL: Routine check-in at 1.0mg dose tier. Screen for GI side effects at new dose. Assess continued engagement and any emerging barriers.\nFLAGS: Approaching 1.7mg escalation window in 2 weeks. No copay assistance program enrolled \u2014 cash price risk if insurance changes.",
+      "client_prompt": "You are Carmen Gutierrez, a 44-year-old woman, 10 weeks on Wegovy (currently 1.0mg weekly injection). You were excited early on \u2014 lost 11 pounds in the first 6 weeks. But the nausea came back worse at the 1.0mg dose. You've been skipping your Saturday morning injection some weeks because you don't want to feel sick on the weekend. You haven't told your doctor. You're also worried because your husband got laid off last month and you're not sure you can keep affording the medication without his insurance as backup. You're embarrassed about the cost concern and will deflect before admitting it. Your fillers are 'like' and 'you know.' You're generally warm but get defensive if you feel judged about adherence.",
+      "greeting": "Hi, is this Carmen Gutierrez?",
+      "voice_broker": "NATF0.pt",
+      "voice_client": "NATF2.pt",
+      "context_injections": [
+        {
+          "frame": 250,
+          "text": "Pharmacy data shows fill gap \u2014 last two dispensing intervals were 9 and 11 days apart vs expected 7. Possible missed doses. Probe gently without accusation."
+        },
+        {
+          "frame": 625,
+          "text": "Patient is not enrolled in Novo Nordisk savings program. Commercially insured patients may pay as little as $0-25/month. Mention the program exists if cost surfaces."
+        }
+      ]
+    },
+    {
+      "id": "eval_ssri_dropoff",
+      "scenario": "SSRI discontinuation recovery \u2014 patient stopped abruptly",
+      "broker_prompt": "PROGRAM: Lexapro Patient Support\nPATIENT: Marcus Thompson, 29M\nMEDICATION: Escitalopram (Lexapro) 10mg daily, 18 weeks on treatment\nCLINICAL: Fill rate dropped to ~40% over last 6 weeks. Last pharmacy pickup: 23 days ago. Initial response reported as positive at week 8 check-in. No adverse events formally reported. Age cohort carries boxed warning for suicidal ideation \u2014 standard monitoring applies.\nPRIOR CONTACT: Last call at week 12. Patient confirmed medication use, mentioned feeling 'pretty good.' Brief call, patient was at work. No follow-up commitments.\nCALL GOAL: Re-engage after apparent lapse. Assess whether patient has discontinued. Screen for discontinuation symptoms. Encourage provider contact.\nFLAGS: 23-day refill gap against 30-day supply. High probability of abrupt discontinuation without taper. No provider visit logged in 8 weeks. Young adult \u2014 enhanced monitoring protocol.",
+      "client_prompt": "You are Marcus Thompson, a 29-year-old man who was prescribed Lexapro 10mg for generalized anxiety 18 weeks ago. You stopped taking it about 3 weeks ago because you felt better and figured you didn't need it anymore. You've been having weird symptoms \u2014 dizziness, brain zaps when you turn your head, irritability \u2014 but you think it might be stress from a new job. You don't connect these symptoms to stopping the medication. You're a bit guarded on the phone because you feel like you made the right decision to stop. You use fillers like 'I mean' and 'honestly.' You're not hostile but you push back if you feel lectured. If someone explains what discontinuation syndrome is, you'll be surprised and a little concerned.",
+      "greeting": "Hi, is this Marcus Thompson?",
+      "voice_broker": "NATF0.pt",
+      "voice_client": "NATM0.pt",
+      "context_injections": [
+        {
+          "frame": 300,
+          "text": "Pharmacy records confirm no fill in 23 days. Patient likely 2+ weeks into abrupt discontinuation. Discontinuation syndrome (brain zaps, dizziness, irritability) is common with escitalopram \u2014 if patient reports these symptoms, note they are worth discussing with their provider."
+        },
+        {
+          "frame": 700,
+          "text": "Patient has not seen prescribing provider in 8+ weeks. A provider callback can be requested through the program. Offer this as a low-friction option."
+        }
+      ]
+    },
+    {
+      "id": "eval_statin_baseline",
+      "scenario": "Statin check-in with muscle complaints \u2014 no injections (baseline)",
+      "broker_prompt": "PROGRAM: Lipitor Adherence Support\nPATIENT: Priya Sharma, 56F\nMEDICATION: Atorvastatin (Lipitor) 20mg daily, 8 weeks on treatment\nCLINICAL: Fill rate 100% through 8 weeks \u2014 two fills on schedule. No side effects reported. Baseline LDL was 188 mg/dL per referral notes. Patient was referred into program by prescribing cardiologist.\nPRIOR CONTACT: Enrollment call only \u2014 week 1. Brief, patient confirmed understanding of medication purpose. No issues raised.\nCALL GOAL: First routine check-in. Screen for side effects (especially muscle symptoms, which are common). Confirm continued adherence. Answer any questions about the program.\nFLAGS: None \u2014 patient appears adherent and engaged. Standard check-in protocol.",
+      "client_prompt": "You are Priya Sharma, a 56-year-old woman who started Lipitor 20mg eight weeks ago after your cardiologist said your cholesterol was high. You've been taking it every night as prescribed. But in the last two weeks you've noticed your legs feel sore and heavy, especially after your evening walks. You assumed it was just aging or not stretching enough, but your sister-in-law (who is a nurse) told you statins can cause muscle problems and that you should stop immediately. You're now worried but haven't stopped yet. You want to know: is this normal? Should you stop? You tend to be polite and deferential but you trust your sister-in-law's medical opinion. Your fillers are 'actually' and 'I was wondering.' You ask direct questions and want straight answers.",
+      "greeting": "Hi, is this Priya Sharma?",
+      "voice_broker": "NATF0.pt",
+      "voice_client": "NATF2.pt"
+    },
+    {
+      "id": "eval_ace_inhibitor_lapse",
+      "scenario": "ACE inhibitor adherence lapse \u2014 patient ran out and didn't refill",
+      "broker_prompt": "PROGRAM: Lisinopril Adherence Program\nPATIENT: Robert \"Bobby\" Dalton, 63M\nMEDICATION: Lisinopril 20mg daily, 26 weeks on treatment\nCLINICAL: Hypertension diagnosed 7 months ago after elevated readings at routine physical. BP at diagnosis 158/96. Fill rate was 90%+ for first 4 months, then dropped \u2014 last pharmacy pickup was 18 days ago against 30-day supply pattern, but prior fill was also late by 5 days. No adverse events reported. No recent labs on file.\nPRIOR CONTACT: Week 12 check-in \u2014 patient confirmed daily use, no complaints. Mentioned he 'doesn't feel any different' on the medication.\nCALL GOAL: Address emerging adherence gap. Explore whether patient is losing motivation given asymptomatic condition. Reinforce importance of consistent use. Encourage upcoming provider visit.\nFLAGS: Two consecutive late fills suggest a pattern, not a one-off. Asymptomatic hypertension is a major driver of non-adherence. Patient has no upcoming provider appointment scheduled.",
+      "client_prompt": "You are Bobby Dalton, a 63-year-old retired electrician. You were put on lisinopril for high blood pressure about six months ago. You never felt sick in the first place \u2014 your doctor just saw some numbers he didn't like at your checkup. You've been taking it most days but you ran out about a week and a half ago and haven't gotten around to picking up the refill. You feel fine, so what's the rush? You're not opposed to the medication but you think the whole thing is overblown. You're friendly and chatty \u2014 you'll talk about your fishing trips, your grandkids, the weather \u2014 anything to avoid a lecture about pills. If pressed, you'll admit you're not great about remembering. Your fillers are 'well' and 'tell you what.' You're good-natured but stubborn once you've made up your mind.",
+      "greeting": "Hi, is this Bobby Dalton?",
+      "voice_broker": "NATF0.pt",
+      "voice_client": "NATM2.pt",
+      "context_injections": [
+        {
+          "frame": 250,
+          "text": "Pharmacy data shows two consecutive late refills. Current gap is 18 days vs 30-day supply \u2014 patient may already be out. Clarify without assuming."
+        },
+        {
+          "frame": 625,
+          "text": "Patient has no provider appointment on file. Suggest scheduling a follow-up to review blood pressure numbers \u2014 concrete data from a visit often re-motivates patients."
+        }
+      ]
+    },
+    {
+      "id": "eval_anticoagulant_routine",
+      "scenario": "Anticoagulant routine check-in \u2014 well-adherent patient with travel concern",
+      "broker_prompt": "PROGRAM: Eliquis Patient Support\nPATIENT: Diane Kowalski, 68F\nMEDICATION: Apixaban (Eliquis) 5mg twice daily, 32 weeks on treatment\nCLINICAL: Atrial fibrillation diagnosed 9 months ago. CHA2DS2-VASc score 4. Initiated on Eliquis post-diagnosis. Fill rate 98% \u2014 exemplary adherence. INR monitoring not required (DOAC). No bleeding events reported. No drug interactions flagged.\nPRIOR CONTACT: Week 16 check-in \u2014 patient engaged and knowledgeable about her condition. Asked detailed questions about food interactions (reassured that Eliquis has no significant dietary restrictions unlike warfarin). Mentioned upcoming retirement trip to Europe.\nCALL GOAL: Routine check-in. Reinforce excellent adherence. Address any travel-related medication management questions. Screen for any bleeding signs or new concerns.\nFLAGS: None clinically. Patient mentioned international travel at last contact \u2014 ensure she has adequate supply and understands time zone management for dosing.",
+      "client_prompt": "You are Diane Kowalski, a 68-year-old recently retired high school principal. You take your Eliquis religiously \u2014 twice a day, 8am and 8pm, with alarms on your phone. You're well-informed about AFib and take your health seriously. You're calling back because you have a trip to Italy coming up in 3 weeks and you're worried about a few things: whether you'll have enough medication for the trip, whether the time zone change messes up your dosing schedule, and what happens if she needs medical care abroad. You also bumped your shin badly last week and the bruise is enormous \u2014 you want to know if that's concerning or just what happens on blood thinners. You're articulate, organized, and pleasant. No fillers to speak of \u2014 you're a former educator and speak in complete sentences. You ask good questions and want thorough answers.",
+      "greeting": "Hi, is this Diane Kowalski?",
+      "voice_broker": "NATF0.pt",
+      "voice_client": "NATF2.pt"
+    }
+  ]
+}

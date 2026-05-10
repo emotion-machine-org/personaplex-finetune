@@ -1,0 +1,78 @@
+audio_loss_weight: 0
+batch_size: 16
+ckpt_freq: 16
+data:
+  eval_data: /mnt/data/personaplex_data/companion_v4/dataset/eval.jsonl
+  shuffle: true
+  train_data: /mnt/data/personaplex_data/companion_v4/dataset/train.jsonl
+do_ckpt: true
+do_eval: true
+duration_sec: 180
+eval_freq: 16
+first_codebook_weight_multiplier: 4
+force_warm_restart: false
+full_finetuning: false
+gen_eval:
+  dialogue_duration: 120
+  dialogue_timeout: 600
+  enable: true
+  eval_prompts_path: finetune/eval_prompts_companion.json
+  freq: 16
+  gpu_a: 0
+  gpu_b: 0
+  llm_model: claude-sonnet-4-20250514
+  llm_review: true
+  max_nudges: 0
+  nudge_after: 2
+  rep_penalty: 0
+  rep_penalty_window: 30
+  seed: 42
+  temp_audio: 0.55
+  temp_text: 0.7
+  topk_audio: 100
+  topk_text: 30
+gradient_checkpointing: true
+log_freq: 1
+lora:
+  enable: true
+  ft_embed: false
+  rank: 64
+  scaling: 2
+  skip_depformer: true
+lora_l2_weight: 0.001
+max_norm: 1
+max_steps: 256
+moshi_paths:
+  config_path: null
+  hf_repo_id: nvidia/personaplex-7b-v1
+  mimi_path: null
+  moshi_path: null
+  tokenizer_path: null
+num_ckpt_keep: null
+num_microbatches: 1
+optim:
+  lr: 2.0e-06
+  pct_start: 0.1
+  weight_decay: 0.1
+overwrite_run_dir: false
+param_dtype: bfloat16
+puppeteer:
+  context_tag: context
+  enable: false
+  max_tokens_per_injection: 50
+resume_from: null
+run_dir: /mnt/data/runs/companion_training-v0-29
+save_adapters: true
+seed: 0
+skip_zero_eval: true
+system_prompt:
+  audio_silence_frames: 6
+  enable: true
+  prompt_budget_frames: 320
+text_padding_weight: 0
+wandb:
+  key: null
+  offline: false
+  project: companion-plex
+  run_name: companion_training-v0.29
+world_size: 1

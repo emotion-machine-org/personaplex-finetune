@@ -1,0 +1,48 @@
+name: Bug report
+description: Something is broken or behaves unexpectedly.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing! Please give us enough context to reproduce.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: One paragraph — what you did, what broke.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Exact commands / config files / git SHA.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware
+      placeholder: "e.g. 5x RTX 3090, CUDA 12.4, driver 550"
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python / PyTorch
+      placeholder: "Python 3.10.12, torch 2.10.0"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / stack trace
+      render: shell

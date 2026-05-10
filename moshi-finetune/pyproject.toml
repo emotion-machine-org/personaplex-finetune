@@ -1,0 +1,102 @@
+[project]
+name = "finetune"
+requires-python = ">= 3.10"
+description = "finetune moshi models"
+dynamic = ["version"]
+readme = "README.md"
+dependencies = [
+  "fire",
+  "simple-parsing",
+  "pyyaml",
+  "safetensors",
+  "tensorboard",
+  "tqdm",
+  "torch==2.6",
+  "triton>=3.2",
+  # "git+https://git@github.com/kyutai-labs/moshi.git#egg=moshi&subdirectory=moshi",
+  # We could also use [tool.uv.sources] to point to the git repo, but this maintains
+  # compatibility with `pip install -e .`
+  "moshi @ git+https://github.com/kyutai-labs/moshi.git#subdirectory=moshi",
+  "sphn>=0.2.0,<0.3.0",
+  "auditok==0.2",
+  "whisper_timestamped",
+  "huggingface_hub",
+  "torchaudio",
+  "submitit",
+  "wandb",
+  "llvmlite>=0.44",
+  "numba>=0.61",
+]
+
+[project.optional-dependencies]
+# We're putting dev dependencies here rather than [dependency-groups.dev] because
+# this way non-uv users can still install them with `pip install -e .[dev]`
+dev = [
+  "flake8",
+  "mypy==1.4.0",
+  "mypy-extensions==1.0.0",
+  "pre-commit",
+  "ruff==0.11",
+  "pyright",
+  "pytest",
+]
+
+[tool.uv]
+# The following fixes Pylance/VSCode not seeing the `finetune` package. See
+# https://github.com/astral-sh/uv/issues/3898
+config-settings = { editable_mode = "compat" }
+
+[tool.setuptools]
+packages = ["finetune"]
+
+[tool.black]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+line-length = 88
+
+[tool.isort]
+known_third_party = []
+line_length = 88
+
+[tool.mypy]
+python_version = "3.9"
+ignore_missing_imports = true
+follow_imports = "normal"
+
+[tool.ruff]
+lint.select = ["E", "F", "W", "C90", "I", "C4", "PT", "RSE", "TID", "TCH", "FLY", "NPY", "RUF", "T10"]
+line-length = 88
+lint.ignore = ["E501"]
+target-version = "py38"
+exclude = [".git","__pycache__",".vscode",".mypy_cache"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 20
+
+[tool.pytest.ini_options]
+python_classes = [
+  "!TestConfig",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+    "ignore::ImportWarning",
+    "ignore::DeprecationWarning:pkg_resources",
+    "ignore::DeprecationWarning:wandb",
+    "ignore::DeprecationWarning:torch.utils.tensorboard",
+    "ignore::UserWarning",
+]
+testpaths = []
+addopts = "--ignore=third_party --ignore=tokens"

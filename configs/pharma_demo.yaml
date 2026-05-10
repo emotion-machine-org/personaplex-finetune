@@ -1,0 +1,78 @@
+# PersonaPlex Pharma patient-support demo finetuning (with context injection)
+#
+# Edit the <EDIT_ME> paths below to point at your own repo / data root
+# before launching training. Paths must be absolute — moshi-finetune does
+# not expand env vars or `~`.
+
+data:
+  train_data: <EDIT_ME>/data/pharma-v2/dataset/train.jsonl
+  eval_data: <EDIT_ME>/data/pharma-v2/dataset/eval.jsonl
+  shuffle: true
+
+# Start from PersonaPlex checkpoint instead of base Moshi
+moshi_paths:
+  hf_repo_id: "nvidia/personaplex-7b-v1"
+
+# PersonaPlex-style hybrid system prompt
+system_prompt:
+  enable: true
+  audio_silence_frames: 6
+  prompt_budget_frames: 0
+
+# Puppeteer context injection (read from per-sample JSON context_injections field)
+puppeteer:
+  enable: true
+  max_tokens_per_injection: 50
+  context_tag: "context"
+
+full_finetuning: false
+lora:
+  enable: true
+  rank: 64
+  scaling: 2.0
+  ft_embed: false
+  skip_depformer: true
+
+first_codebook_weight_multiplier: 4.
+text_padding_weight: 0.04
+audio_loss_weight: 1.0
+lora_l2_weight: 1e-4
+
+duration_sec: 80
+batch_size: 8
+max_steps: 1024
+gradient_checkpointing: true
+num_microbatches: 6
+optim:
+  lr: 2.0e-05
+  weight_decay: 0.1
+  pct_start: 0.05
+
+# Checkpointing & eval
+seed: 0
+log_freq: 1
+eval_freq: 64
+do_eval: true
+do_ckpt: true
+ckpt_freq: 64
+num_ckpt_keep: null
+skip_zero_eval: true
+save_adapters: true
+
+run_dir: <EDIT_ME>/runs/pharma-demo
+overwrite_run_dir: false
+
+wandb:
+  project: "pharma-demo"
+  run_name: "pharma-demo"
+
+gen_eval:
+  enable: true
+  freq: 64
+  gpu_a: 3
+  gpu_b: 4
+  dialogue_duration: 150.0
+  seed: 42
+  eval_prompts_path: "<EDIT_ME>/moshi-finetune/finetune/eval_prompts_pharma.json"
+  llm_review: true
+  dialogue_timeout: 900

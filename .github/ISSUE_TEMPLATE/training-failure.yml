@@ -1,0 +1,49 @@
+name: Training failure
+description: A training run diverged, OOM'd, or produced degenerate output.
+labels: ["bug", "training"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, check `docs/history/notes/combined_experiment_report.md` —
+        common failure modes (PAD collapse, silence overfit, LR-too-high
+        collapse) are documented there with fixes.
+  - type: input
+    id: config
+    attributes:
+      label: Config used
+      placeholder: "configs/pharma_demo.yaml (with edits — paste below)"
+    validations:
+      required: true
+  - type: textarea
+    id: edits
+    attributes:
+      label: Config edits
+      description: What you changed from the published config.
+      render: yaml
+  - type: dropdown
+    id: failure-mode
+    attributes:
+      label: Failure mode
+      options:
+        - OOM
+        - Loss diverged (NaN / inf)
+        - Loss low but generation degenerate (silence collapse, repetition, screech)
+        - Slow / hang / no progress
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware (GPU count, type, total VRAM)
+    validations:
+      required: true
+  - type: input
+    id: wandb
+    attributes:
+      label: WandB run URL (if any)
+  - type: textarea
+    id: notes
+    attributes:
+      label: Other context
