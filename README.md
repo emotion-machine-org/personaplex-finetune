@@ -1,4 +1,4 @@
-# PersonaPlex Insurance Broker Voice Training
+# Finetuning Personaplex on Specific Domains with Synthetic Data
 
 > **Status: WIP. Not tested on a wide range of setups - we welcome any and all contributions for improving developer experience.**
 
