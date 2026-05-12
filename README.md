@@ -16,7 +16,7 @@ https://github.com/user-attachments/assets/6b797841-ddb0-4cf8-80fa-219310b9bcc9
 
 The base model fails at executing a structured call because it's not good at following instructions although the finetuned model is far from perfect as well. The base model is the client in this example and it is confused especially at the start but the finetuned model (Mia) manages to mostly stay on track, like a real call:
 
-https://github.com/user-attachments/assets/f4df4072-eb40-4354-9977-bf60d1fad2b1
+https://github.com/user-attachments/assets/6218ef69-9343-4d15-a9b6-8aac58c41452
 
 ## What we did with this code
 
